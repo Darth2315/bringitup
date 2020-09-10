@@ -3128,24 +3128,29 @@ function (_Slider) {
   }, {
     key: "nextSlide",
     value: function nextSlide() {
-      if (this.slides[1].tagName == 'BUTTON' && this.slides[2].tagName == 'BUTTON') {
-        this.container.appendChild(this.slides[0]); // slide
+      for (var i = 1; i < this.slides.length; i++) {
+        if (this.slides[i].tagName !== 'BUTTON') {
+          this.container.appendChild(this.slides[0]);
+          this.decorizeSlides();
+          break;
+        } else {
+          this.container.appendChild(this.slides[i]);
+          i--;
+        }
+      } // if (this.slides[1].tagName == 'BUTTON' && this.slides[2].tagName == 'BUTTON') {
+      //     this.container.appendChild(this.slides[0]); // slide
+      //     this.container.appendChild(this.slides[1]); // btn
+      //     this.container.appendChild(this.slides[2]); // btn
+      //     this.decorizeSlides();
+      // } else if (this.slides[1].tagName == 'BUTTON') {
+      //     this.container.appendChild(this.slides[0]); // slide
+      //     this.container.appendChild(this.slides[1]); // btn
+      //     this.decorizeSlides();
+      // } else {
+      //     this.container.appendChild(this.slides[0]);
+      //     this.decorizeSlides();
+      // }   
 
-        this.container.appendChild(this.slides[1]); // btn
-
-        this.container.appendChild(this.slides[2]); // btn
-
-        this.decorizeSlides();
-      } else if (this.slides[1].tagName == 'BUTTON') {
-        this.container.appendChild(this.slides[0]); // slide
-
-        this.container.appendChild(this.slides[1]); // btn
-
-        this.decorizeSlides();
-      } else {
-        this.container.appendChild(this.slides[0]);
-        this.decorizeSlides();
-      }
     }
   }, {
     key: "bindTriggers",
@@ -3157,7 +3162,7 @@ function (_Slider) {
       });
       this.prev.addEventListener('click', function () {
         for (var i = _this2.slides.length - 1; i > 0; i--) {
-          if (_this2.slides[i].tagName !== 'BUTTON') {
+          if (_this2.slides[i].tagName !== "BUTTON") {
             var active = _this2.slides[i];
 
             _this2.container.insertBefore(active, _this2.slides[0]);
@@ -3170,18 +3175,29 @@ function (_Slider) {
       });
     }
   }, {
-    key: "init",
-    value: function init() {
+    key: "playPausedAutoplay",
+    value: function playPausedAutoplay() {
       var _this3 = this;
 
+      var startAutoplay = setInterval(function () {
+        return _this3.nextSlide();
+      }, 5000);
+      this.container.addEventListener('mouseenter', function () {
+        clearInterval(startAutoplay);
+      });
+      this.container.addEventListener('mouseleave', function () {
+        _this3.playPausedAutoplay();
+      });
+    }
+  }, {
+    key: "init",
+    value: function init() {
       this.container.style.cssText = "\n            display: flex;\n            flex-wrap: wrap;\n            overflow: hidden;\n            align-items: flex-start;\n        ";
       this.bindTriggers();
       this.decorizeSlides();
 
       if (this.autoplay) {
-        setInterval(function () {
-          return _this3.nextSlide();
-        }, 5000);
+        this.playPausedAutoplay();
       }
     }
   }]);
@@ -3218,7 +3234,8 @@ var Slider = function Slider() {
       _ref$activeClass = _ref.activeClass,
       activeClass = _ref$activeClass === void 0 ? '' : _ref$activeClass,
       animate = _ref.animate,
-      autoplay = _ref.autoplay;
+      autoplay = _ref.autoplay,
+      paused = _ref.paused;
 
   _classCallCheck(this, Slider);
 
@@ -3230,6 +3247,7 @@ var Slider = function Slider() {
   this.activeClass = activeClass;
   this.animate = animate;
   this.autoplay = autoplay;
+  this.paused = paused;
   this.slideIndex = 1;
 };
 

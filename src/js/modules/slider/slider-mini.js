@@ -25,19 +25,29 @@ export default class MiniSlider extends Slider {
     }
 
     nextSlide() {
-        if (this.slides[1].tagName == 'BUTTON' && this.slides[2].tagName == 'BUTTON') {
-            this.container.appendChild(this.slides[0]); // slide
-            this.container.appendChild(this.slides[1]); // btn
-            this.container.appendChild(this.slides[2]); // btn
-            this.decorizeSlides();
-        } else if (this.slides[1].tagName == 'BUTTON') {
-            this.container.appendChild(this.slides[0]); // slide
-            this.container.appendChild(this.slides[1]); // btn
-            this.decorizeSlides();
-        } else {
-            this.container.appendChild(this.slides[0]);
-            this.decorizeSlides();
-        }   
+        for (let i = 1; i < this.slides.length; i++) {
+            if (this.slides[i].tagName !== 'BUTTON') {
+                this.container.appendChild(this.slides[0]);
+                this.decorizeSlides();
+                break;
+            } else {
+                this.container.appendChild(this.slides[i]);
+                i--;
+            }
+        }
+        // if (this.slides[1].tagName == 'BUTTON' && this.slides[2].tagName == 'BUTTON') {
+        //     this.container.appendChild(this.slides[0]); // slide
+        //     this.container.appendChild(this.slides[1]); // btn
+        //     this.container.appendChild(this.slides[2]); // btn
+        //     this.decorizeSlides();
+        // } else if (this.slides[1].tagName == 'BUTTON') {
+        //     this.container.appendChild(this.slides[0]); // slide
+        //     this.container.appendChild(this.slides[1]); // btn
+        //     this.decorizeSlides();
+        // } else {
+        //     this.container.appendChild(this.slides[0]);
+        //     this.decorizeSlides();
+        // }   
     }
 
     bindTriggers() {
@@ -46,13 +56,25 @@ export default class MiniSlider extends Slider {
         this.prev.addEventListener('click', () => {
 
             for (let i = this.slides.length - 1; i > 0; i--) {
-                if (this.slides[i].tagName !== 'BUTTON') {
-                    let active = this.slides[i];
-                    this.container.insertBefore(active, this.slides[0]);
-                    this.decorizeSlides();
-                    break;
-                }
-            }            
+            if (this.slides[i].tagName !== "BUTTON") {
+                let active = this.slides[i];
+                this.container.insertBefore(active, this.slides[0]);
+                this.decorizeSlides();
+                break;
+            }
+        }       
+        });
+    }
+
+    playPausedAutoplay() {
+        const startAutoplay = setInterval(() => this.nextSlide(), 5000);
+
+        this.container.addEventListener('mouseenter', () => {
+            clearInterval(startAutoplay);
+        });
+
+        this.container.addEventListener('mouseleave', () => {
+            this.playPausedAutoplay();
         });
     }
 
@@ -68,7 +90,7 @@ export default class MiniSlider extends Slider {
         this.decorizeSlides();
 
         if (this.autoplay) {
-            setInterval(() => this.nextSlide(), 5000);
+            this.playPausedAutoplay(); 
         }
     }
 }

@@ -5,7 +5,8 @@ export default class Slider {
         prev = null,
         activeClass = '',
         animate,
-        autoplay } = {}) {
+        autoplay,
+        paused } = {}) {
         this.container = document.querySelector(container);
         this.slides = this.container.children;
         this.btns = document.querySelectorAll(btns);
@@ -14,6 +15,7 @@ export default class Slider {
         this.activeClass = activeClass;
         this.animate = animate;
         this.autoplay = autoplay;
+        this.paused = paused;
         this.slideIndex = 1;
     }
 }
