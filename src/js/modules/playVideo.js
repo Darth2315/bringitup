@@ -3,6 +3,7 @@ export default class VideoPlayer {
         this.btns = document.querySelectorAll(triggers);
         this.overlay = document.querySelector(overlay);
         this.close = this.overlay.querySelector('.close');
+        this.onPlayerStateChange = this.onPlayerStateChange.bind(this);
     }
 
     bindTriggers() {
@@ -10,9 +11,13 @@ export default class VideoPlayer {
             item.addEventListener('click', ()=> {
                 if (document.querySelector('iframe#frame')) {
                     this.overlay.style.display = 'flex';
+                    if (this.path !== item.getAttribute('data-url')) {
+                        this.path = item.getAttribute('data-url');
+                        this.player.loadVideoById({videoId: this.path});
+                    }
                 } else {
-                    const path = item.getAttribute('data-url');
-                    this.createPlayer(path);
+                    this.path = item.getAttribute('data-url');
+                    this.createPlayer(this.path);
                 }
             });
         });
@@ -29,21 +34,42 @@ export default class VideoPlayer {
         this.player = new YT.Player('frame', {
             height: '100%',
             width: '100%',
-            videoId: `${url}`
+            videoId: `${url}`,
+            events: {
+                'onStateChange': this.onPlayerStateChange
+            }
         });
 
         this.overlay.style.display = 'flex';
-        console.log(this.player);
+    }
+
+    onPlayerStateChange(state) {
+        const blockedElem = this.activeBtn.closest('.module__video-item').nextElementSibling,
+              playBtn = this.activeBtn.querySelector('svg').cloneNode(true);
+
+        if (state.data === 0) {
+            if (blockedElem.querySelector('.play__circle').classList.contains('closed')) {
+                blockedElem.querySelector('.play__circle').classList.remove('closed');
+                blockedElem.querySelector('svg').remove();
+                blockedElem.querySelector('.play__circle').appendChild(playBtn);
+                blockedElem.querySelector('.play__text').textContent = 'play video';
+                blockedElem.querySelector('.play__text').classList.remove('attention');
+                blockedElem.style.opacity = 1;
+                blockedElem.style.filter = 'none';
+            }
+        }        
     }
 
     init() {
-        const tag = document.createElement('script');
+        if (this.btns.length > 0) {
+            const tag = document.createElement('script');
 
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        this.bindTriggers();
-        this.bindCloseBtn();
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    
+            this.bindTriggers();
+            this.bindCloseBtn();
+        } 
     }
 }
